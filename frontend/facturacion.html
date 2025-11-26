@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTech - Facturación</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 250px;
+            background-color: #121212;
+            color: #b3b3b3;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            border-right: 1px solid #333;
+        }
+        .logo { color: white; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+        .user-status { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-size: 0.9rem; color: white; }
+        .status-dot { width: 10px; height: 10px; background-color: #00ff88; border-radius: 50%; } 
+        
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li { margin-bottom: 15px; }
+        .nav-links a { text-decoration: none; color: #b3b3b3; display: flex; align-items: center; gap: 15px; font-size: 1.1rem; padding: 10px; border-radius: 8px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background-color: #0072ff; color: white; } 
+        .logout { margin-top: auto; display: flex; align-items: center; gap: 10px; color: #b3b3b3; text-decoration: none; cursor: pointer; }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .main-content {
+            flex: 1;
+            background: radial-gradient(circle at top right, #1a2a6c, #0f172a, #050505);
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { 
+            color: white; 
+            text-transform: uppercase; 
+            margin-bottom: 20px; 
+            width: 100%; 
+            max-width: 900px;
+            font-size: 1.8rem;
+        }
+
+        /* --- CONTENEDOR BLANCO DEL FORMULARIO --- */
+        .form-container {
+            background: white;
+            width: 100%;
+            max-width: 900px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* SECCIÓN 1: DATOS DEL CLIENTE */
+        .section-client { padding: 25px; border-bottom: 1px solid #eee; }
+        .section-title { font-weight: bold; color: #333; margin-bottom: 15px; font-size: 1.1rem; }
+
+        .search-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .search-input-group { flex-grow: 1; display: flex; align-items: center; }
+        .search-input-group input { width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 5px 0 0 5px; outline: none; background: #f9f9f9; }
+        .search-btn { padding: 10px 15px; background-color: #0072ff; color: white; border: none; border-radius: 0 5px 5px 0; cursor: pointer; }
+
+        /* Botón Nuevo Cliente con Enlace */
+        .link-wrapper { text-decoration: none; }
+        .btn-new-client {
+            background: linear-gradient(90deg, #00c6ff, #9d00ff);
+            color: white; border: none; padding: 10px 20px;
+            border-radius: 20px; font-weight: bold; cursor: pointer; white-space: nowrap;
+        }
+
+        .client-info-display { color: #666; font-size: 0.95rem; }
+        .client-info-display p { margin-bottom: 5px; }
+        .client-field { background: #f0f0f0; padding: 8px; border-radius: 5px; color: #888; margin-bottom: 5px; display: inline-block; min-width: 300px; }
+
+        /* SECCIÓN 2: CARRITO */
+        .section-cart { padding: 0; background-color: #fafafa; border-bottom: 1px solid #eee; }
+        .section-cart-header { padding: 15px 25px; font-weight: bold; color: #333; font-size: 1.1rem; background: white; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px 25px; background-color: #eaeaea; color: #555; font-size: 0.9rem; }
+        td { padding: 15px 25px; border-bottom: 1px solid #e0e0e0; color: #444; }
+        .btn-remove { color: white; background-color: #ff4d4d; border: none; width: 25px; height: 25px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+
+        /* SECCIÓN 3: TOTALES */
+        .section-totals { padding: 25px; background: white; }
+        .total-text { font-size: 1.5rem; font-weight: bold; color: #333; margin-bottom: 20px; }
+        
+        .btn-process {
+            width: 100%; padding: 15px; border: none; border-radius: 30px;
+            background: linear-gradient(90deg, #00c6ff, #9d00ff);
+            color: white; font-size: 1.2rem; font-weight: bold;
+            cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3); transition: transform 0.2s;
+        }
+        .btn-process:hover { transform: scale(1.01); }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo"><i class='bx bx-chip'></i> SyncTech</div>
+        
+        <div class="user-status">
+            <div class="status-dot"></div>
+            Personal de Ventas
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class='bx bx-home-alt'></i> Inicio</a></li>
+            <li><a href="ventas.html"><i class='bx bx-cart-add'></i> Venta Rápida</a></li>
+            <li><a href="#" class="active"><i class='bx bx-cart'></i> Facturación</a></li> <li><a href="#"><i class='bx bx-list-ul'></i> Pedidos</a></li>
+        </ul>
+
+        <a href="login.html" class="logout"><i class='bx bx-log-out'></i> Cerrar Sesión</a>
+    </nav>
+
+    <main class="main-content">
+        <h1>Registro de Venta y Facturación</h1>
+
+        <div class="form-container">
+            
+            <div class="section-client">
+                <div class="section-title">Datos del Cliente</div>
+                
+                <div class="search-row">
+                    <div class="search-input-group">
+                        <input type="text" placeholder="Buscar Cliente (nombre/DUI)">
+                        <button class="search-btn"><i class='bx bx-search'></i></button>
+                    </div>
+                    
+                    <a href="registro_cliente.html" class="link-wrapper">
+                        <button class="btn-new-client">Registrar Nuevo Cliente</button>
+                    </a>
+                </div>
+
+                <div class="client-info-display">
+                    <p>Nombre</p>
+                    <div class="client-field">ana.rodriguez@email.com</div>
+                    <p style="margin-top:5px; font-size: 0.8rem;">+503 7XXX-XXAX</p>
+                </div>
+            </div>
+
+            <div class="section-cart">
+                <div class="section-cart-header">Carrito de Venta</div>
+                <table>
+                    <thead>
+                        <tr> <th>Producto</th> <th>Cantidad</th> <th>Precio Unitario</th> <th>Subtotal</th> <th></th> </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Producto A</td> <td>2 Uds.</td> <td>$15.00</td> <td>$30.00</td>
+                            <td><button class="btn-remove"><i class='bx bx-x'></i></button></td>
+                        </tr>
+                        <tr>
+                            <td>Producto B</td> <td>5 Uds.</td> <td>$10.00</td> <td>$50.00</td>
+                            <td><button class="btn-remove"><i class='bx bx-x'></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-totals">
+                <div class="section-title">Totales y Cierre</div>
+                <div class="total-text">TOTAL A PAGAR: $80.00 USD</div>
+                <button class="btn-process" onclick="alert('Generando Factura PDF...')">
+                    PROCESAR VENTA Y GENERAR FACTURA
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

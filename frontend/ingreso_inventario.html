@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTech - Ingreso Inventario</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 250px;
+            background-color: #121212;
+            color: #b3b3b3;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            border-right: 1px solid #333;
+        }
+        .logo { color: white; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+        
+        .user-status { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-size: 0.9rem; color: white; }
+        .status-dot { width: 10px; height: 10px; background-color: #ffcc00; border-radius: 50%; } /* Amarillo Bodega */
+        
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li { margin-bottom: 15px; }
+        .nav-links a { text-decoration: none; color: #b3b3b3; display: flex; align-items: center; gap: 15px; font-size: 1.1rem; padding: 10px; border-radius: 8px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background-color: #0072ff; color: white; } 
+        .logout { margin-top: auto; display: flex; align-items: center; gap: 10px; color: #b3b3b3; text-decoration: none; cursor: pointer; }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .main-content {
+            flex: 1;
+            background: radial-gradient(circle at top right, #1a2a6c, #0f172a, #050505);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centrar todo horizontalmente */
+            overflow-y: auto;
+        }
+
+        h1 { 
+            color: white; 
+            text-transform: uppercase; 
+            margin-bottom: 40px; 
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: white;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 600px;
+            text-align: left;
+        }
+
+        /* --- TARJETA FORMULARIO --- */
+        .card-form {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Botón estilo "Pestaña" superior */
+        .tab-btn {
+            background: linear-gradient(90deg, #00c6ff, #9d00ff);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0, 114, 255, 0.3);
+        }
+
+        /* Buscador */
+        .search-group {
+            display: flex;
+            margin-bottom: 25px;
+        }
+        .search-group input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            outline: none;
+        }
+        .search-group button {
+            background-color: #0072ff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+
+        /* Campos y Etiquetas */
+        label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        /* Visualización del producto seleccionado */
+        .product-display {
+            display: flex;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 1px solid #ddd;
+        }
+        
+        .prod-name {
+            flex-grow: 1;
+            padding: 10px 15px;
+            color: #555;
+            font-size: 0.95rem;
+        }
+        
+        .prod-stock {
+            background-color: #e0e0e0;
+            padding: 10px 15px;
+            color: #333;
+            font-weight: bold;
+            border-left: 1px solid #ccc;
+        }
+
+        /* Input de cantidad */
+        .qty-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        /* Botón Registrar */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(90deg, #00c6ff, #9d00ff);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0, 114, 255, 0.4);
+            transition: transform 0.2s;
+        }
+        .btn-submit:hover { transform: scale(1.02); }
+
+        .btn-cancel {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #ccc;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn-cancel:hover { color: white; }
+
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo"><i class='bx bx-chip'></i> SyncTech</div>
+        
+        <div class="user-status">
+            <div class="status-dot"></div>
+            Bodega / Admin
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class='bx bxs-dashboard'></i> Inicio</a></li>
+            <li><a href="inventario.html" class="active"><i class='bx bx-box'></i> Inventario</a></li> <li><a href="facturacion.html"><i class='bx bx-cart'></i> Facturación</a></li>
+        </ul>
+
+        <a href="login.html" class="logout"><i class='bx bx-log-out'></i> Cerrar Sesión</a>
+    </nav>
+
+    <main class="main-content">
+        
+        <h1>Registro de Ingreso de Inventario</h1>
+
+        <div class="subtitle">Registrar Nuevo Producto</div>
+
+        <div class="card-form">
+            
+            <div class="tab-btn">Añadir Stock Existente</div>
+
+            <div class="search-group">
+                <input type="text" placeholder="Buscar Producto (nombre/código)">
+                <button><i class='bx bx-search'></i></button>
+            </div>
+
+            <label>Buscar Producto</label>
+            <div class="product-display">
+                <div class="prod-name">Producto A - Lámpara LED</div>
+                <div class="prod-stock">50 Uds.</div>
+            </div>
+
+            <label>Cantidad a Ingresar:</label>
+            <input type="number" class="qty-input" placeholder="Ej: 10">
+
+            <button class="btn-submit" onclick="alert('Stock Actualizado')">
+                Registrar
+            </button>
+        </div>
+
+        <a href="inventario.html" class="btn-cancel">Cancelar y Volver</a>
+
+    </main>
+
+</body>
+</html>

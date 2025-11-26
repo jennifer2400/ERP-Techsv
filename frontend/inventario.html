@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTech - Inventario</title>
+    <!-- Iconos -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 250px;
+            background-color: #121212;
+            color: #b3b3b3;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            border-right: 1px solid #333;
+        }
+        .logo { color: white; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+        
+        .user-status { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-size: 0.9rem; color: white; }
+        .status-dot { width: 10px; height: 10px; background-color: #ffcc00; border-radius: 50%; } /* Amarillo Bodega */
+
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li { margin-bottom: 15px; }
+        .nav-links a { text-decoration: none; color: #b3b3b3; display: flex; align-items: center; gap: 15px; font-size: 1.1rem; padding: 10px; border-radius: 8px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background-color: rgba(255, 255, 255, 0.1); color: white; }
+        .logout { margin-top: auto; display: flex; align-items: center; gap: 10px; color: #b3b3b3; text-decoration: none; cursor: pointer; }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .main-content {
+            flex: 1;
+            /* Fondo azul oscuro degradado */
+            background: radial-gradient(circle at top right, #1a2a6c, #0f172a, #050505);
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        h1 { color: white; text-transform: uppercase; margin-bottom: 30px; }
+
+        /* --- BARRA DE ACCIONES --- */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            width: 300px;
+        }
+        .search-box input { border: none; outline: none; margin-left: 10px; width: 100%; }
+
+        /* Enlace que envuelve al botón */
+        .link-wrapper { text-decoration: none; }
+
+        .btn-add {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s;
+        }
+        .btn-add:hover { transform: scale(1.05); }
+
+        /* --- TABLA DE INVENTARIO --- */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; color: #666; font-size: 0.9rem; border-bottom: 2px solid #f0f0f0; }
+        td { padding: 15px; border-bottom: 1px solid #eee; color: #333; }
+        
+        /* Estilos de Estado (Stock) */
+        .badge { padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; }
+        .in-stock { background-color: #d1fae5; color: #065f46; } /* Verde */
+        .low-stock { background-color: #fee2e2; color: #991b1b; } /* Rojo */
+
+        .actions i { font-size: 1.2rem; cursor: pointer; margin-right: 10px; color: #666; transition: 0.2s; }
+        .actions i:hover { color: #0072ff; }
+
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="logo"><i class='bx bx-chip'></i> SyncTech</div>
+        
+        <div class="user-status">
+            <div class="status-dot"></div>
+            Bodega / Admin
+        </div>
+
+        <ul class="nav-links">
+            <!-- CONEXIONES -->
+            <li><a href="dashboard.html"><i class='bx bxs-dashboard'></i> Inicio</a></li>
+            <li><a href="#" class="active"><i class='bx bx-box'></i> Inventario</a></li> <!-- Activo -->
+            <li><a href="facturacion.html"><i class='bx bx-cart'></i> Facturación</a></li>
+        </ul>
+
+        <a href="login.html" class="logout"><i class='bx bx-log-out'></i> Cerrar Sesión</a>
+    </nav>
+
+    <!-- CONTENIDO -->
+    <main class="main-content">
+        <h1>Gestión de Inventario (Nube)</h1>
+
+        <!-- Barra de búsqueda y botón -->
+        <div class="action-bar">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" placeholder="Buscar producto...">
+            </div>
+            
+            <!-- CONEXIÓN: Botón al Formulario de Ingreso -->
+            <a href="ingreso_inventario.html" class="link-wrapper">
+                <button class="btn-add">
+                    <i class='bx bx-plus'></i> Nuevo Producto
+                </button>
+            </a>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>PRODUCTO</th>
+                        <th>STOCK</th>
+                        <th>PRECIO</th>
+                        <th>ESTADO</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCuerpo">
+                    <!-- MENSAJE DE CARGA INICIAL -->
+                    <tr><td colspan="6" style="text-align:center; padding: 20px;">Cargando datos de Cloud SQL...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <!-- LÓGICA JAVASCRIPT PARA LEER DE LA NUBE -->
+    <script>
+        // 🔥 URL DE TU BACKEND EN GOOGLE CLOUD 🔥
+        const API_URL = 'https://synctech-887224374141.us-central1.run.app';
+
+        async function cargarDatos() {
+            try {
+                // Petición GET a tu Backend (ruta /inventario)
+                const respuesta = await fetch(`${API_URL}/inventario`);
+                
+                // Convertir respuesta a JSON (lista de productos)
+                const productos = await respuesta.json();
+
+                const tbody = document.getElementById('tablaCuerpo');
+                tbody.innerHTML = ''; // Limpiar mensaje de carga
+
+                // Recorrer cada producto y crear la fila
+                productos.forEach(prod => {
+                    const fila = document.createElement('tr');
+                    
+                    // Determinar estilo según stock
+                    const claseBadge = prod.stock > 10 ? 'in-stock' : 'low-stock';
+                    const textoBadge = prod.stock > 10 ? 'En Stock' : 'Bajo Stock';
+                    
+                    // Construir HTML de la fila usando los nombres de tu SQL
+                    fila.innerHTML = `
+                        <td>#${prod.id_inventario}</td>
+                        <td><b>${prod.articulo}</b></td>
+                        <td>${prod.stock}</td>
+                        <td>$${prod.precio}</td>
+                        <td><span class="badge ${claseBadge}">${textoBadge}</span></td>
+                        <td class="actions">
+                            <i class='bx bx-edit'></i>
+                            <i class='bx bx-trash'></i>
+                        </td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('tablaCuerpo').innerHTML = 
+                    '<tr><td colspan="6" style="text-align:center; color:red; padding: 20px;">Error cargando datos. Verifica la conexión.</td></tr>';
+            }
+        }
+
+        // Ejecutar al abrir la página
+        cargarDatos();
+    </script>
+
+</body>
+</html>

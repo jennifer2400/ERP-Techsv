@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTech Login</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <style>
+        /* --- ESTILOS CSS (DISEÑO) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Fondo azul oscuro con degradado radial */
+            background: radial-gradient(circle at center, #1a2a6c, #0f172a, #000000);
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Logo y Título */
+        .logo {
+            font-size: 2rem;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Campos de texto (Efecto Cristal) */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+        }
+
+        .glass-input {
+            width: 100%;
+            padding: 15px 15px 15px 45px; /* Espacio para el icono */
+            background: rgba(255, 255, 255, 0.15); /* Transparencia */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .glass-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Botón (Degradado Azul/Morado) */
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(90deg, #00c6ff, #9d00ff);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(0, 198, 255, 0.3);
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 25px rgba(157, 0, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        
+        <div class="logo">
+            <i class='bx bx-chip'></i> SyncTech
+        </div>
+
+        <h2>Inicia Sesión</h2>
+
+        <form>
+            <div class="input-group">
+                <i class='bx bxs-envelope'></i>
+                <input type="text" placeholder="Email o ID" class="glass-input" required>
+            </div>
+
+            <div class="input-group">
+                <i class='bx bxs-lock-alt'></i>
+                <input type="password" placeholder="Password" class="glass-input" required>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Log In
+            </button>
+        </form>
+
+    </div>
+
+    <script>
+        const form = document.querySelector('form');
+        const userInput = document.querySelector('input[type="text"]');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Evita que la página se recargue
+
+            const textoUsuario = userInput.value.toLowerCase().trim();
+
+            // Lógica simple de redirección
+            if (textoUsuario === 'admin' || textoUsuario === 'gerente') {
+                // Redirige al dashboard
+                window.location.href = 'dashboard.html';
+            } 
+            else if (textoUsuario === 'ventas' || textoUsuario === 'vendedor') {
+                // Redirige a ventas
+                window.location.href = 'ventas.html';
+            } 
+            else {
+                alert('Usuario no reconocido. \n\nPrueba con: "admin" o "ventas"');
+            }
+        });
+    </script>
+
+</body>
+</html>

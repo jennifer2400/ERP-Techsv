@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTech - Ventas Rápidas</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 250px; background-color: #121212; color: #b3b3b3; display: flex; flex-direction: column; padding: 20px; border-right: 1px solid #333; }
+        .logo { color: white; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+        .user-status { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-size: 0.9rem; color: white; }
+        .status-dot { width: 10px; height: 10px; background-color: #00ff88; border-radius: 50%; }
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li { margin-bottom: 15px; }
+        .nav-links a { text-decoration: none; color: #b3b3b3; display: flex; align-items: center; gap: 15px; font-size: 1.1rem; padding: 10px; border-radius: 8px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background-color: rgba(255, 255, 255, 0.1); color: white; }
+        .logout { margin-top: auto; display: flex; align-items: center; gap: 10px; color: #b3b3b3; text-decoration: none; cursor: pointer; }
+        .main-content { flex: 1; background: radial-gradient(circle at top right, #1a2a6c, #0f172a, #050505); padding: 40px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        h1 { color: white; text-transform: uppercase; font-size: 2.5rem; margin-bottom: 30px; width: 100%; max-width: 600px; line-height: 1.2; }
+        .card-form { background-color: white; border-radius: 15px; padding: 40px; width: 100%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; font-weight: bold; color: #333; margin-bottom: 8px; }
+        .input-field, .select-field { width: 100%; padding: 12px; background-color: #f0f2f5; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; outline: none; }
+        .row-group { display: flex; align-items: center; gap: 20px; }
+        .small-input { width: 120px; }
+        .stock-info { font-weight: bold; color: #333; }
+        .stock-info span { display: block; font-size: 0.9rem; color: #666; font-weight: normal; }
+        .price-info { font-weight: bold; font-size: 1.1rem; margin-top: 10px; color: #333; }
+        .btn-submit { display: block; width: 100%; margin-top: 30px; padding: 15px; border: none; border-radius: 30px; background: linear-gradient(90deg, #00c6ff, #9d00ff); color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.4); transition: transform 0.2s; }
+        .btn-submit:hover { transform: scale(1.02); }
+        .btn-disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo"><i class='bx bx-chip'></i> SyncTech</div>
+        <div class="user-status"><div class="status-dot"></div> Personal de Ventas</div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class='bx bx-home-alt'></i> Inicio</a></li>
+            <li><a href="#" class="active"><i class='bx bx-cart-add'></i> Venta Rápida</a></li>
+            <li><a href="facturacion.html"><i class='bx bx-cart'></i> Facturación</a></li>
+            <li><a href="#"><i class='bx bx-list-ul'></i> Pedidos</a></li>
+        </ul>
+        <a href="login.html" class="logout"><i class='bx bx-log-out'></i> Cerrar Sesión</a>
+    </nav>
+
+    <main class="main-content">
+        <h1>Registro de Venta Rápida</h1>
+        <div class="card-form">
+            <form>
+                <div class="form-group">
+                    <label>Producto:</label>
+                    <!-- ID para JS -->
+                    <select class="select-field" id="selectProducto">
+                        <option value="">Cargando productos de la nube...</option>
+                    </select>
+                </div>
+
+                <div class="form-group row-group">
+                    <div>
+                        <label>Cantidad:</label>
+                        <input type="number" id="inputCantidad" class="input-field small-input" placeholder="Uds." value="1" min="1">
+                    </div>
+                    <div class="stock-info">
+                        STOCK: <br>
+                        <span id="labelStock">-- Uds.</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="price-info">
+                        VALOR UNITARIO: &nbsp; <span id="labelPrecio">$0.00</span>
+                    </div>
+                    <div class="price-info" style="color: #00c6ff;">
+                        TOTAL: &nbsp; <span id="labelTotal">$0.00</span>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-submit" id="btnVender">
+                    Registrar Venta Real
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        // 🔥 URL DE TU BACKEND EN GOOGLE CLOUD 🔥
+        const API_URL = 'https://synctech-887224374141.us-central1.run.app';
+
+        let productosGlobal = [];
+        let productoSeleccionado = null;
+
+        const select = document.getElementById('selectProducto');
+        const labelStock = document.getElementById('labelStock');
+        const labelPrecio = document.getElementById('labelPrecio');
+        const labelTotal = document.getElementById('labelTotal');
+        const inputCantidad = document.getElementById('inputCantidad');
+        const btnVender = document.getElementById('btnVender');
+
+        // 1. Cargar productos al iniciar
+        async function cargarProductos() {
+            try {
+                const res = await fetch(`${API_URL}/inventario`);
+                productosGlobal = await res.json();
+
+                select.innerHTML = '<option value="">Seleccione un producto...</option>';
+                
+                productosGlobal.forEach(prod => {
+                    const option = document.createElement('option');
+                    // Guardamos el ID real de la base de datos en el value
+                    option.value = prod.id_inventario; 
+                    option.text = prod.articulo;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error(error);
+                select.innerHTML = '<option>Error de conexión</option>';
+            }
+        }
+
+        // 2. Evento al seleccionar producto
+        select.addEventListener('change', function() {
+            const id = this.value;
+            // Buscar el producto completo en nuestra lista global
+            productoSeleccionado = productosGlobal.find(p => p.id_inventario == id);
+
+            if (productoSeleccionado) {
+                labelStock.innerText = productoSeleccionado.stock + " Uds.";
+                labelPrecio.innerText = "$" + parseFloat(productoSeleccionado.precio).toFixed(2);
+                actualizarTotal();
+
+                // Validar si hay stock
+                if (productoSeleccionado.stock <= 0) {
+                    labelStock.style.color = "red";
+                    labelStock.innerText = "SIN STOCK";
+                    btnVender.classList.add('btn-disabled');
+                    btnVender.disabled = true;
+                } else {
+                    labelStock.style.color = "#333";
+                    btnVender.classList.remove('btn-disabled');
+                    btnVender.disabled = false;
+                }
+            } else {
+                resetUI();
+            }
+        });
+
+        // 3. Calcular total al cambiar cantidad
+        inputCantidad.addEventListener('input', actualizarTotal);
+
+        function actualizarTotal() {
+            if (productoSeleccionado) {
+                const cant = parseInt(inputCantidad.value) || 0;
+                const total = cant * parseFloat(productoSeleccionado.precio);
+                labelTotal.innerText = "$" + total.toFixed(2);
+            }
+        }
+
+        function resetUI() {
+            labelStock.innerText = "-- Uds.";
+            labelPrecio.innerText = "$0.00";
+            labelTotal.innerText = "$0.00";
+            productoSeleccionado = null;
+        }
+
+        // 4. PROCESAR VENTA EN LA NUBE
+        btnVender.addEventListener('click', async () => {
+            if (!productoSeleccionado) return alert("Seleccione un producto");
+            
+            const cantidad = parseInt(inputCantidad.value);
+            if (cantidad <= 0) return alert("Cantidad inválida");
+            if (cantidad > productoSeleccionado.stock) return alert("No hay suficiente stock");
+
+            // Preparar datos para la API
+            const ventaData = {
+                id_cliente: 1, // Cliente genérico "Mostrador"
+                total: cantidad * parseFloat(productoSeleccionado.precio),
+                items: [
+                    {
+                        id_inventario: productoSeleccionado.id_inventario,
+                        cantidad: cantidad,
+                        precio: parseFloat(productoSeleccionado.precio),
+                        subtotal: cantidad * parseFloat(productoSeleccionado.precio)
+                    }
+                ]
+            };
+
+            // UI Loading
+            btnVender.innerText = "Procesando...";
+            btnVender.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/venta`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(ventaData)
+                });
+                
+                const data = await res.json();
+
+                if (data.success) {
+                    alert(`✅ ¡Venta Exitosa!\nFactura #${data.id_factura} generada en la nube.`);
+                    // Recargar datos para actualizar stock visualmente
+                    await cargarProductos(); 
+                    resetUI();
+                    inputCantidad.value = 1;
+                    select.value = "";
+                } else {
+                    alert("Error al vender: " + (data.error || "Desconocido"));
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error de conexión");
+            } finally {
+                btnVender.innerText = "Registrar Venta Real";
+                btnVender.disabled = false;
+            }
+        });
+
+        // Iniciar
+        cargarProductos();
+    </script>
+
+</body>
+</html>
