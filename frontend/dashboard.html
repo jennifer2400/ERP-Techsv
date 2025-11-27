@@ -4,100 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SyncTech - Dashboard Gerente</title>
+    <!-- Usamos Boxicons para iconos modernos -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     
     <style>
-        /* --- ESTILOS GENERALES --- */
+        /* --- ESTILOS BASE Y RESPONSIVE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-
         body { display: flex; height: 100vh; overflow: hidden; }
-
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 250px;
-            background-color: #121212;
-            color: #b3b3b3;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            border-right: 1px solid #333;
-        }
-
+        
+        /* Sidebar Estilo */
+        .sidebar { width: 250px; background-color: #121212; color: #b3b3b3; display: flex; flex-direction: column; padding: 20px; border-right: 1px solid #333; transition: width 0.3s; }
         .logo { color: white; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
         .user-status { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-size: 0.9rem; color: white; }
         .status-dot { width: 10px; height: 10px; background-color: #00ff88; border-radius: 50%; }
-
         .nav-links { list-style: none; flex-grow: 1; }
         .nav-links li { margin-bottom: 15px; }
         .nav-links a { text-decoration: none; color: #b3b3b3; display: flex; align-items: center; gap: 15px; font-size: 1.1rem; padding: 10px; border-radius: 8px; transition: 0.3s; }
         .nav-links a:hover, .nav-links a.active { background-color: rgba(255, 255, 255, 0.1); color: white; }
-        
         .logout { margin-top: auto; display: flex; align-items: center; gap: 10px; color: #b3b3b3; text-decoration: none; cursor: pointer; }
-
-        /* --- CONTENIDO PRINCIPAL --- */
-        .main-content {
-            flex: 1;
-            background: radial-gradient(circle at top right, #1a2a6c, #0f172a, #050505);
-            padding: 40px;
-            overflow-y: auto;
-        }
-
+        
+        /* Contenido Principal */
+        .main-content { flex: 1; background: radial-gradient(circle at top right, #1a2a6c, #0f172a, #050505); padding: 40px; overflow-y: auto; }
         h1 { color: white; text-transform: uppercase; margin-bottom: 30px; font-size: 2rem; }
-
-        /* --- GRID --- */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 25px;
-            height: calc(100% - 80px);
-            max-height: 600px;
-        }
-
-        /* TARJETAS */
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-title {
-            font-size: 0.9rem;
-            color: #666;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 10px;
-        }
-
-        /* RESUMEN */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; max-width: 1200px; width: 100%; }
+        
+        /* Estilo de Tarjetas */
+        .card { background-color: white; border-radius: 12px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; }
+        .card-title { font-size: 0.9rem; color: #666; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
         .finance-row { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .big-number { font-size: 1.8rem; font-weight: bold; color: #333; }
         .sub-label { font-size: 0.8rem; color: #888; }
         
-        /* INVENTARIO */
-        .inventory-list { display: flex; flex-direction: column; gap: 15px; }
-        .inv-item { display: flex; justify-content: space-between; font-size: 1.1rem; }
-        .inv-item span:last-child { font-weight: bold; }
+        /* Estilo para Lista de Productos */
+        .top-products { padding: 0; }
+        .top-products li { list-style: none; padding: 12px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; color: #444; }
+        .top-products li:last-child { border-bottom: none; }
+        .top-products li b { color: #333; font-weight: 600; }
+        .placeholder-text { text-align: center; color: #999; font-style: italic; padding: 15px; }
 
-        /* GRÁFICA */
+        /* Estilo para la Gráfica (Simulada) */
         .chart-container { flex-grow: 1; display: flex; align-items: flex-end; justify-content: center; }
         .chart-line { width: 100%; height: 100px; stroke: #9d00ff; stroke-width: 3; fill: rgba(157, 0, 255, 0.1); }
-
-        /* PRODUCTOS TOP */
-        .top-products li {
-            list-style: none; padding: 12px 0; border-bottom: 1px solid #eee;
-            display: flex; justify-content: space-between; color: #444;
+        
+        /* Media Query para Móviles */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; }
+            .sidebar { width: 100%; height: auto; flex-direction: column; padding: 10px 20px; border-right: none; border-bottom: 1px solid #333; position: relative; }
+            .user-status { display: none; }
+            .nav-links { display: flex; flex-wrap: wrap; padding: 10px 0; }
+            .nav-links li { margin-bottom: 5px; width: 50%; }
+            .nav-links a { padding: 8px 10px; font-size: 0.9rem; justify-content: flex-start; gap: 5px; }
+            .logout { margin-top: 10px; width: 100%; text-align: center; border-top: 1px solid #333; padding-top: 5px; }
+            .main-content { padding: 20px; overflow-x: hidden; height: auto; }
+            h1 { font-size: 1.5rem; margin-bottom: 20px; }
+            .dashboard-grid { grid-template-columns: 1fr; gap: 20px; }
         }
-        .top-products li b { color: #333; }
+
     </style>
 </head>
 <body>
 
+    <!-- SIDEBAR -->
     <nav class="sidebar">
         <div class="logo"><i class='bx bx-chip'></i> SyncTech</div>
         
@@ -110,40 +77,54 @@
             <li><a href="#" class="active"><i class='bx bxs-dashboard'></i> Inicio</a></li>
             <li><a href="#"><i class='bx bx-user'></i> Perfil</a></li>
             <li><a href="ventas.html"><i class='bx bx-cart'></i> Ventas</a></li>
-            
             <li><a href="inventario.html"><i class='bx bx-box'></i> Inventario</a></li>
         </ul>
 
         <a href="login.html" class="logout"><i class='bx bx-log-out'></i> Cerrar Sesión</a>
     </nav>
 
+    <!-- DASHBOARD -->
     <main class="main-content">
         <h1>Panel de Control - Gerente</h1>
 
         <div class="dashboard-grid">
             
+            <!-- TARJETA 1: Resumen del Mes (CONECTADO) -->
             <div class="card">
                 <div class="card-title">Resumen del Mes</div>
                 <div class="finance-row">
-                    <div><div class="sub-label">Ventas Totales</div><div class="big-number">$45,200 USD</div></div>
-                    <div><div class="sub-label">Ganancias Netas</div><div class="big-number" style="color: #009966;">$18,500 USD</div></div>
+                    <div>
+                        <div class="sub-label">Ventas Totales</div>
+                        <!-- DATOS REALES -->
+                        <div class="big-number" id="ventasTotales">Cargando...</div>
+                    </div>
+                    <div>
+                        <div class="sub-label">Ganancias Netas (Sim.)</div>
+                        <div class="big-number" style="color: #009966;">$18,500 USD</div>
+                    </div>
                 </div>
                 <div class="sub-label">Tendencia de ventas: ⬆ 12% vs mes anterior</div>
             </div>
 
+            <!-- TARJETA 2: Inventario Clave (CONECTADO) -->
             <div class="card">
                 <div class="card-title">Inventario Clave</div>
                 <div class="inventory-list">
-                    <div class="inv-item"><span>Items en Stock:</span><span>3500 Uds.</span></div>
-                    <div class="inv-item"><span>Stock Bajo:</span><span style="color: red;">80 Uds.</span></div>
+                    <!-- DATOS REALES -->
+                    <div class="inv-item"><span>Items en Stock Total:</span><span id="stockTotal" class="big-number">Cargando...</span></div>
+                    
+                    <!-- DATOS FIJOS -->
+                    <div class="inv-item" style="margin-top: 20px;"><span>Stock Bajo:</span><span style="color: red; font-weight: bold;">80 Uds.</span></div>
                     <div class="inv-item"><span>En camino:</span><span>500 Uds.</span></div>
                 </div>
             </div>
 
+            <!-- TARJETA 3: Estadísticas (Simulada) -->
             <div class="card">
                 <div class="card-title">Estadísticas de Venta</div>
-                <div class="sub-label">Items en Stock: 3500 Uds.</div>
+                <div class="sub-label">Visión semanal.</div>
                 <div class="chart-container">
+                    <!-- Gráfico SVG (simulación) -->
                     <svg viewBox="0 0 300 100" class="chart-line">
                         <defs>
                             <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -157,17 +138,100 @@
                 </div>
             </div>
 
+            <!-- TARJETA 4: Objetos Más Vendidos (CONECTADO) -->
             <div class="card">
                 <div class="card-title">Objetos Más Vendidos</div>
-                <ul class="top-products">
-                    <li><span>1. Producto A</span><b>40%</b></li>
-                    <li><span>2. Producto C</span><b>70 Uds</b></li>
-                    <li><span>3. Producto B</span><b>60%</b></li>
+                <ul class="top-products" id="topProductsList">
+                    <!-- Contenido cargado por JavaScript -->
+                    <li><div class="placeholder-text">Cargando reportes de ventas...</div></li>
                 </ul>
             </div>
 
         </div>
     </main>
+    
+    <script>
+        // Asegúrate de que esta URL sea la correcta para tu Cloud Function
+        const API_URL = 'https://synctech-887224374141.us-central1.run.app';
 
+        // --- Funciones de Carga de Datos ---
+
+        // 1. Cargar Reporte de Productos Más Vendidos
+        async function loadTopProducts() {
+            const topProductsList = document.getElementById('topProductsList');
+            topProductsList.innerHTML = '<li><div class="placeholder-text">Calculando...</div></li>';
+            
+            try {
+                // Llama a la ruta /reporte/top
+                const response = await fetch(`${API_URL}/reporte/top`);
+                const products = await response.json();
+
+                topProductsList.innerHTML = '';
+                
+                if (products.length === 0) {
+                    topProductsList.innerHTML = '<li><div class="placeholder-text">Aún no hay ventas registradas.</div></li>';
+                    return;
+                }
+                
+                products.forEach((prod, index) => {
+                    const listItem = document.createElement('li');
+                    const totalVendido = prod.total_vendido; 
+
+                    listItem.innerHTML = `
+                        <span>${index + 1}. ${prod.articulo}</span>
+                        <b>${totalVendido} Uds.</b>
+                    `;
+                    topProductsList.appendChild(listItem);
+                });
+
+            } catch (error) {
+                console.error("Error al cargar Top Productos:", error);
+                topProductsList.innerHTML = '<li><div class="placeholder-text" style="color:red;">Error de conexión. Verifica la URL de la API.</div></li>';
+            }
+        }
+        
+        // 2. Cargar Stock Total y Ventas Totales
+        async function loadFinancialData() {
+            const stockTotalElement = document.getElementById('stockTotal');
+            const ventasTotalesElement = document.getElementById('ventasTotales');
+            
+            stockTotalElement.textContent = '...';
+            ventasTotalesElement.textContent = '...';
+
+            try {
+                // Llama a la ruta /reporte/finanzas
+                const response = await fetch(`${API_URL}/reporte/finanzas`);
+                const data = await response.json(); // { total_stock: X, total_ventas: Y }
+                
+                if (data.total_stock !== undefined) {
+                    // Formatear Ventas Totales
+                    const formattedSales = new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 2
+                    }).format(data.total_ventas || 0);
+
+                    stockTotalElement.textContent = data.total_stock + ' Uds.';
+                    ventasTotalesElement.textContent = formattedSales;
+
+                } else {
+                    stockTotalElement.textContent = 'Error';
+                    ventasTotalesElement.textContent = '$0.00';
+                }
+
+            } catch (error) {
+                stockTotalElement.textContent = 'Error';
+                ventasTotalesElement.textContent = 'Error';
+            }
+        }
+
+
+        // --- Ejecución al Iniciar ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFinancialData(); // Carga Stock Total y Ventas Totales
+            loadTopProducts();
+        });
+
+    </script>
 </body>
 </html>

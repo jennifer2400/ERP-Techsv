@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SyncTech - Facturación</title>
+    <!-- Iconos -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!-- LIBRERÍA JS PARA GENERAR PDF (Importante: debe estar en el head) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
         /* --- ESTILOS GENERALES --- */
@@ -12,19 +16,10 @@
         body { display: flex; height: 100vh; overflow: hidden; }
 
         /* --- SIDEBAR --- */
-        .sidebar {
-            width: 250px;
-            background-color: #121212;
-            color: #b3b3b3;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            border-right: 1px solid #333;
-        }
+        .sidebar { width: 250px; background-color: #121212; color: #b3b3b3; display: flex; flex-direction: column; padding: 20px; border-right: 1px solid #333; }
         .logo { color: white; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
         .user-status { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-size: 0.9rem; color: white; }
         .status-dot { width: 10px; height: 10px; background-color: #00ff88; border-radius: 50%; } 
-        
         .nav-links { list-style: none; flex-grow: 1; }
         .nav-links li { margin-bottom: 15px; }
         .nav-links a { text-decoration: none; color: #b3b3b3; display: flex; align-items: center; gap: 15px; font-size: 1.1rem; padding: 10px; border-radius: 8px; transition: 0.3s; }
@@ -42,24 +37,10 @@
             align-items: center;
         }
 
-        h1 { 
-            color: white; 
-            text-transform: uppercase; 
-            margin-bottom: 20px; 
-            width: 100%; 
-            max-width: 900px;
-            font-size: 1.8rem;
-        }
+        h1 { color: white; text-transform: uppercase; margin-bottom: 20px; width: 100%; max-width: 900px; font-size: 1.8rem; }
 
         /* --- CONTENEDOR BLANCO DEL FORMULARIO --- */
-        .form-container {
-            background: white;
-            width: 100%;
-            max-width: 900px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        .form-container { background: white; width: 100%; max-width: 900px; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
         /* SECCIÓN 1: DATOS DEL CLIENTE */
         .section-client { padding: 25px; border-bottom: 1px solid #eee; }
@@ -67,10 +48,9 @@
 
         .search-row { display: flex; gap: 15px; margin-bottom: 15px; }
         .search-input-group { flex-grow: 1; display: flex; align-items: center; }
-        .search-input-group input { width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 5px 0 0 5px; outline: none; background: #f9f9f9; }
+        .search-input-group input, .search-input-group select { width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 5px 0 0 5px; outline: none; background: #f9f9f9; }
         .search-btn { padding: 10px 15px; background-color: #0072ff; color: white; border: none; border-radius: 0 5px 5px 0; cursor: pointer; }
 
-        /* Botón Nuevo Cliente con Enlace */
         .link-wrapper { text-decoration: none; }
         .btn-new-client {
             background: linear-gradient(90deg, #00c6ff, #9d00ff);
@@ -82,7 +62,13 @@
         .client-info-display p { margin-bottom: 5px; }
         .client-field { background: #f0f0f0; padding: 8px; border-radius: 5px; color: #888; margin-bottom: 5px; display: inline-block; min-width: 300px; }
 
-        /* SECCIÓN 2: CARRITO */
+        /* Búsqueda de Productos */
+        .product-search-bar { display: flex; gap: 10px; margin-bottom: 20px; padding: 0 25px; align-items: center; }
+        .product-search-bar select { flex: 4; padding: 10px; border-radius: 5px; }
+        .product-search-bar input { flex: 1; padding: 10px; border-radius: 5px; width: 80px; }
+        .product-search-bar button { flex: 1; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+
+        /* SECCIÓN 2: CARRITO (TABLA) */
         .section-cart { padding: 0; background-color: #fafafa; border-bottom: 1px solid #eee; }
         .section-cart-header { padding: 15px 25px; font-weight: bold; color: #333; font-size: 1.1rem; background: white; }
         table { width: 100%; border-collapse: collapse; }
@@ -93,7 +79,6 @@
         /* SECCIÓN 3: TOTALES */
         .section-totals { padding: 25px; background: white; }
         .total-text { font-size: 1.5rem; font-weight: bold; color: #333; margin-bottom: 20px; }
-        
         .btn-process {
             width: 100%; padding: 15px; border: none; border-radius: 30px;
             background: linear-gradient(90deg, #00c6ff, #9d00ff);
@@ -106,6 +91,7 @@
 </head>
 <body>
 
+    <!-- SIDEBAR -->
     <nav class="sidebar">
         <div class="logo"><i class='bx bx-chip'></i> SyncTech</div>
         
@@ -115,69 +101,437 @@
         </div>
 
         <ul class="nav-links">
-            <li><a href="dashboard.html"><i class='bx bx-home-alt'></i> Inicio</a></li>
             <li><a href="ventas.html"><i class='bx bx-cart-add'></i> Venta Rápida</a></li>
-            <li><a href="#" class="active"><i class='bx bx-cart'></i> Facturación</a></li> <li><a href="#"><i class='bx bx-list-ul'></i> Pedidos</a></li>
+            <li><a href="#" class="active"><i class='bx bx-cart'></i> Facturación</a></li> <!-- Activo -->
+            <li><a href="pedidos.html"><i class='bx bx-list-ul'></i> Pedidos</a></li>
         </ul>
 
         <a href="login.html" class="logout"><i class='bx bx-log-out'></i> Cerrar Sesión</a>
     </nav>
 
+    <!-- CONTENIDO PRINCIPAL -->
     <main class="main-content">
         <h1>Registro de Venta y Facturación</h1>
 
         <div class="form-container">
             
+            <!-- 1. DATOS DEL CLIENTE (INTEGRADO CON BÚSQUEDA) -->
             <div class="section-client">
                 <div class="section-title">Datos del Cliente</div>
                 
                 <div class="search-row">
                     <div class="search-input-group">
-                        <input type="text" placeholder="Buscar Cliente (nombre/DUI)">
-                        <button class="search-btn"><i class='bx bx-search'></i></button>
+                        <!-- CAMPO DE BÚSQUEDA DEL CLIENTE -->
+                        <input id="inputBuscarCliente" type="text" placeholder="Buscar Cliente (nombre/DUI)">
+                        <!-- BOTÓN DE BÚSQUEDA -->
+                        <button type="button" id="btnBuscarCliente" class="search-btn"><i class='bx bx-search'></i></button>
                     </div>
                     
+                    <!-- CONEXIÓN: Botón a Registro Cliente -->
                     <a href="registro_cliente.html" class="link-wrapper">
                         <button class="btn-new-client">Registrar Nuevo Cliente</button>
                     </a>
                 </div>
 
                 <div class="client-info-display">
-                    <p>Nombre</p>
-                    <div class="client-field">ana.rodriguez@email.com</div>
-                    <p style="margin-top:5px; font-size: 0.8rem;">+503 7XXX-XXAX</p>
+                    <!-- ETIQUETAS DINÁMICAS -->
+                    <p id="labelNombreCliente">Cliente Actual: Cliente General (ID 1)</p>
+                    <small id="labelIdCliente" style="display:block;">Facturando a ID de Cliente: 1</small>
                 </div>
             </div>
+            
+            <!-- 2. BARRA DE BÚSQUEDA DE PRODUCTOS -->
+            <div class="product-search-bar">
+                <select id="productSelect">
+                    <option value="">Cargando inventario...</option>
+                </select>
+                <input type="number" id="qtyInput" value="1" min="1" placeholder="Cantidad">
+                <button id="addBtn">Añadir al Carrito</button>
+            </div>
 
+            <!-- 3. CARRITO DE VENTA -->
             <div class="section-cart">
                 <div class="section-cart-header">Carrito de Venta</div>
                 <table>
                     <thead>
-                        <tr> <th>Producto</th> <th>Cantidad</th> <th>Precio Unitario</th> <th>Subtotal</th> <th></th> </tr>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Subtotal</th>
+                            <th></th>
+                        </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>Producto A</td> <td>2 Uds.</td> <td>$15.00</td> <td>$30.00</td>
-                            <td><button class="btn-remove"><i class='bx bx-x'></i></button></td>
-                        </tr>
-                        <tr>
-                            <td>Producto B</td> <td>5 Uds.</td> <td>$10.00</td> <td>$50.00</td>
-                            <td><button class="btn-remove"><i class='bx bx-x'></i></button></td>
-                        </tr>
+                    <tbody id="cartTableBody">
+                        <!-- Filas del carrito se agregan aquí con JS -->
+                        <tr><td colspan="5" style="text-align:center; color:#999;">Agregue productos arriba.</td></tr>
                     </tbody>
                 </table>
             </div>
 
+            <!-- 4. TOTALES Y CIERRE -->
             <div class="section-totals">
                 <div class="section-title">Totales y Cierre</div>
-                <div class="total-text">TOTAL A PAGAR: $80.00 USD</div>
-                <button class="btn-process" onclick="alert('Generando Factura PDF...')">
+                <div class="total-text">
+                    TOTAL A PAGAR: <span id="finalTotal">$0.00 USD</span>
+                </div>
+                
+                <button class="btn-process" id="processBtn">
                     PROCESAR VENTA Y GENERAR FACTURA
                 </button>
             </div>
 
         </div>
     </main>
+
+    <script>
+        // 🔥 URL DE TU BACKEND EN GOOGLE CLOUD 🔥
+        const API_URL = 'https://synctech-887224374141.us-central1.run.app';
+        
+        let inventory = []; // Inventario completo cargado de la BD
+        let cartItems = []; // Carrito de compras actual
+        
+        // OBJETO DEL CLIENTE ACTUAL (Default: ID 1 para 'Consumidor Final')
+        let clienteActual = { id_cliente: 1, nombre: 'Cliente General (ID 1)' }; 
+
+
+        // --- Elementos del Frontend ---
+        const productSelect = document.getElementById('productSelect');
+        const qtyInput = document.getElementById('qtyInput');
+        const addBtn = document.getElementById('addBtn');
+        const cartTableBody = document.getElementById('cartTableBody');
+        const finalTotalDisplay = document.getElementById('finalTotal');
+        const processBtn = document.getElementById('processBtn');
+        
+        // Elementos de Búsqueda de Cliente
+        const inputBuscarCliente = document.getElementById('inputBuscarCliente');
+        const btnBuscarCliente = document.getElementById('btnBuscarCliente');
+        const labelNombreCliente = document.getElementById('labelNombreCliente');
+        const labelIdCliente = document.getElementById('labelIdCliente');
+        
+        // Cargar librería jsPDF al inicio
+        const { jsPDF } = window.jspdf;
+
+
+        // --- LÓGICA DE BÚSQUEDA DE CLIENTE ---
+
+        // Función para actualizar la UI del cliente
+        function actualizarClienteActual(cliente) {
+            clienteActual = cliente;
+            labelNombreCliente.textContent = `Cliente Actual: ${cliente.nombre}`;
+            labelIdCliente.textContent = `Facturando a ID de Cliente: ${cliente.id_cliente}`;
+        }
+        
+        // Evento del botón buscar
+        btnBuscarCliente.addEventListener('click', async () => {
+            const texto = inputBuscarCliente.value.trim();
+            if (!texto) return alert('Escribe un nombre o DUI para buscar.');
+            
+            // Determinar si la búsqueda es por DUI o por nombre/criterio general
+            const esDUI = /^\d{8}-\d$/.test(texto); // Simple regex para DUI (8 dígitos - 1 dígito)
+            
+            let url = `${API_URL}/cliente?`;
+            url += esDUI ? `dui=${texto}` : `q=${texto}`;
+            
+            try {
+                const resp = await fetch(url);
+                const data = await resp.json();
+
+                if (data.success && data.cliente) {
+                    actualizarClienteActual(data.cliente);
+                    alert(`✅ Cliente encontrado: ${data.cliente.nombre}`);
+                } else {
+                    // Si no lo encuentra, usa el cliente por defecto (ID 1)
+                    actualizarClienteActual({ id_cliente: 1, nombre: 'Cliente General (ID 1)' });
+                    alert('Cliente no encontrado. Se mantendrá el cliente por defecto (ID 1).');
+                }
+            } catch (error) {
+                console.error('Error de conexión al buscar cliente:', error);
+                alert('Error de conexión al buscar cliente. Verifique su API.');
+            }
+        });
+
+        // --- Generación de PDF ---
+        function generatePDF(invoiceId) {
+            
+            if (!clienteActual.nombre || !invoiceId) {
+                 console.error("Error al generar PDF: Faltan datos (cliente o ID de factura).");
+                 return;
+            }
+
+            const totalText = finalTotalDisplay.textContent;
+            const doc = new jsPDF();
+            let y = 20; // Posición inicial Y
+            const lineHeight = 7;
+            const margin = 15;
+            const col1 = margin;
+            const col2 = 100;
+            const col3 = 130;
+            const col4 = 175;
+
+            // Título y encabezado
+            doc.setFontSize(18);
+            doc.text("SyncTech S.A. de C.V.", col1, y);
+            y += lineHeight;
+
+            doc.setFontSize(10);
+            doc.text("Dirección: San Salvador, El Salvador", col1, y);
+            y += lineHeight;
+            doc.text("Teléfono: +503 1234-5678", col1, y);
+            y += lineHeight * 2;
+            
+            // Datos de la Factura
+            doc.setFontSize(14);
+            doc.text(`FACTURA N° ${invoiceId}`, col1, y);
+            doc.setFontSize(10);
+            doc.text(`Fecha: ${new Date().toLocaleDateString('es-SV')}`, 150, y);
+            y += lineHeight * 2;
+            
+            // Datos del Cliente
+            doc.setFontSize(12);
+            doc.text("CLIENTE:", col1, y);
+            y += lineHeight;
+            doc.setFontSize(10);
+            doc.text(`Nombre: ${clienteActual.nombre}`, col1, y);
+            y += lineHeight;
+            doc.text(`DUI/ID: ${clienteActual.dui || 'N/A'} (ID Cliente: ${clienteActual.id_cliente})`, col1, y);
+            y += lineHeight * 2;
+            
+            // CABECERA DE LA TABLA
+            doc.setFontSize(10);
+            doc.setFillColor(200, 200, 200);
+            doc.rect(margin, y, 180, lineHeight, 'F');
+            doc.text("Producto", col1 + 2, y + 5);
+            doc.text("Cant.", col2, y + 5);
+            doc.text("P. Unitario", col3, y + 5);
+            doc.text("Subtotal", col4, y + 5, null, null, "right"); // Alineado a la derecha
+            y += lineHeight;
+
+            // ITEMS DE LA TABLA
+            doc.setFontSize(9);
+            cartItems.forEach(item => {
+                const subtotal = item.cantidad * item.precio;
+                // Columna Producto (Máx 30 caracteres para evitar desbordamiento)
+                doc.text(item.articulo.substring(0, 30), col1 + 2, y + 5);
+                // Columna Cantidad
+                doc.text(item.cantidad.toString(), col2, y + 5);
+                // Columna Precio Unitario
+                doc.text(`$${item.precio.toFixed(2)}`, col3, y + 5);
+                // Columna Subtotal (Alineado a la derecha)
+                doc.text(`$${subtotal.toFixed(2)}`, col4, y + 5, null, null, "right");
+                y += lineHeight;
+            });
+            y += lineHeight;
+            
+            // TOTAL FINAL
+            doc.setFontSize(14);
+            doc.text("TOTAL:", col3, y + 5);
+            doc.text(totalText, col4, y + 5, null, null, "right");
+
+            // Pie de página
+            y += lineHeight * 3;
+            doc.setFontSize(8);
+            doc.text("Gracias por su compra.", col1, y);
+
+
+            // Guardar el PDF
+            doc.save(`Factura_SyncTech_${invoiceId}.pdf`);
+        }
+        
+        // Función auxiliar para calcular el total del carrito (necesario para la API)
+        function calcularTotalCarrito() {
+            return cartItems.reduce((total, item) => total + (item.cantidad * item.precio), 0);
+        }
+
+
+        // --- Funciones del Carrito y Lógica de Venta ---
+
+        function renderCart() {
+            cartTableBody.innerHTML = '';
+            let total = 0;
+
+            if (cartItems.length === 0) {
+                cartTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">El carrito está vacío.</td></tr>';
+                finalTotalDisplay.textContent = '$0.00 USD';
+                processBtn.disabled = true;
+                return;
+            }
+            
+            processBtn.disabled = false;
+
+            cartItems.forEach((item, index) => {
+                const subtotal = item.cantidad * item.precio;
+                total += subtotal;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.articulo}</td>
+                    <td>${item.cantidad} Uds.</td>
+                    <td>$${item.precio.toFixed(2)}</td>
+                    <td>$${subtotal.toFixed(2)}</td>
+                    <td><button class="btn-remove" data-index="${index}"><i class='bx bx-x'></i></button></td>
+                `;
+                cartTableBody.appendChild(row);
+            });
+
+            finalTotalDisplay.textContent = `$${total.toFixed(2)} USD`;
+        }
+
+        function addItemToCart() {
+            const selectedIndex = productSelect.value;
+            const quantity = parseInt(qtyInput.value);
+
+            if (!selectedIndex || quantity <= 0) return alert("Seleccione producto y cantidad.");
+            
+            const product = inventory.find(p => p.id_inventario == selectedIndex);
+            
+            if (!product) return;
+
+            if (quantity > product.stock) {
+                return alert(`Stock Insuficiente: Solo hay ${product.stock} unidades.`);
+            }
+
+            // Crear el objeto para el carrito
+            const newItem = {
+                id_inventario: product.id_inventario,
+                articulo: product.articulo,
+                precio: parseFloat(product.precio),
+                cantidad: quantity,
+            };
+            
+            // Lógica simple: si ya existe, sumamos la cantidad (se podría hacer más complejo)
+            const existingItemIndex = cartItems.findIndex(item => item.id_inventario === newItem.id_inventario);
+
+            if (existingItemIndex > -1) {
+                cartItems[existingItemIndex].cantidad += quantity;
+            } else {
+                cartItems.push(newItem);
+            }
+
+            // Restamos el stock localmente (para la UX)
+            product.stock -= quantity;
+            
+            renderCart();
+            qtyInput.value = 1;
+            productSelect.value = '';
+        }
+
+        function removeItemFromCart(index) {
+            const itemToRemove = cartItems[index];
+            if (itemToRemove) {
+                // Devolvemos el stock al inventario local
+                const inventoryProduct = inventory.find(p => p.id_inventario === itemToRemove.id_inventario);
+                if (inventoryProduct) {
+                    inventoryProduct.stock += itemToRemove.cantidad;
+                }
+                
+                cartItems.splice(index, 1);
+                renderCart();
+            }
+        }
+        
+        // Listener para eliminar producto
+        cartTableBody.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-remove')) {
+                const index = e.target.closest('.btn-remove').dataset.index;
+                removeItemFromCart(parseInt(index));
+            }
+        });
+
+        // Listener para añadir producto
+        addBtn.addEventListener('click', addItemToCart);
+
+
+        // --- Conexión y Carga de Inventario ---
+
+        async function loadInventory() {
+            try {
+                // Llama a la ruta /inventario para obtener productos desde Cloud SQL
+                const res = await fetch(`${API_URL}/inventario`);
+                inventory = await res.json();
+                
+                productSelect.innerHTML = '<option value="">Añadir producto...</option>';
+                inventory.forEach(prod => {
+                    const option = document.createElement('option');
+                    option.value = prod.id_inventario; 
+                    option.text = `${prod.articulo} ($${parseFloat(prod.precio).toFixed(2)}) (Stock: ${prod.stock})`;
+                    productSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error al cargar inventario:', error);
+                productSelect.innerHTML = '<option>Error de conexión al cargar inventario</option>';
+            }
+        }
+
+        // --- Procesamiento Final de Venta (Con PDF) ---
+
+        processBtn.addEventListener('click', async () => {
+            if (cartItems.length === 0) return alert("El carrito está vacío. Agregue productos.");
+            
+            const totalFinal = calcularTotalCarrito();
+            
+            // Prepara los datos para la transacción en la API
+            const transactionData = {
+                id_cliente: clienteActual.id_cliente, // Usamos el ID del cliente seleccionado
+                total: totalFinal,
+                items: cartItems.map(item => ({
+                    id_inventario: item.id_inventario,
+                    cantidad: item.cantidad,
+                    precio: item.precio,
+                    subtotal: item.cantidad * item.precio
+                }))
+            };
+
+            // UI Loading
+            processBtn.innerText = "PROCESANDO... (No cierre)";
+            processBtn.disabled = true;
+
+            try {
+                // 1. Llamada a la API para registrar la venta y descontar stock
+                const res = await fetch(`${API_URL}/venta`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transactionData)
+                });
+                
+                const data = await res.json();
+
+                if (data.success) {
+                    const invoiceId = data.id_factura;
+                    
+                    // 2. GENERAR PDF (Lógica de Facturación Digital)
+                    generatePDF(invoiceId);
+
+                    alert(`✅ ¡Venta registrada y Factura #${invoiceId} Generada! (PDF descargado).`);
+                    
+                    // 3. Resetear UI
+                    cartItems = []; // Vaciar carrito
+                    actualizarClienteActual({ id_cliente: 1, nombre: 'Cliente General (ID 1)' }); // Volver a cliente por defecto
+                    await loadInventory(); // Recargar inventario para reflejar el nuevo stock
+
+                } else {
+                    alert("❌ Error de Transacción: " + (data.error || "Datos incompletos o error de base de datos."));
+                }
+            } catch (error) {
+                console.error('Error al procesar venta:', error);
+                alert("Error de conexión al procesar venta. Verifique la URL de la API.");
+            } finally {
+                processBtn.innerText = "PROCESAR VENTA Y GENERAR FACTURA";
+                processBtn.disabled = false;
+                renderCart(); // Renderiza carrito vacío
+            }
+        });
+
+
+        // --- Inicialización ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInventory();
+            renderCart();
+            // Asegurarse de que el cliente por defecto se muestre
+            actualizarClienteActual(clienteActual);
+        });
+
+    </script>
 
 </body>
 </html>

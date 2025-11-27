@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTech - Pedidos/Facturas</title>
+    <!-- Iconos -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!-- LIBRERÍA JS PARA GENERAR PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 250px; background-color: #121212; color: #b3b3b3; display: flex; flex-direction: column; padding: 20px; border-right: 1px solid #333; }
+        .logo { color: white; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li { margin-bottom: 15px; }
+        .nav-links a { text-decoration: none; color: #b3b3b3; display: flex; align-items: center; gap: 15px; font-size: 1.1rem; padding: 10px; border-radius: 8px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background-color: rgba(255, 255, 255, 0.1); color: white; }
+        .logout { margin-top: auto; display: flex; align-items: center; gap: 10px; color: #b3b3b3; text-decoration: none; cursor: pointer; }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .main-content {
+            flex: 1;
+            background: radial-gradient(circle at top right, #1a2a6c, #0f172a, #050505);
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        h1 { color: white; text-transform: uppercase; margin-bottom: 30px; }
+
+        /* --- TABLA DE PEDIDOS --- */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; color: #666; font-size: 0.9rem; border-bottom: 2px solid #f0f0f0; }
+        td { padding: 15px; border-bottom: 1px solid #eee; color: #333; }
+        
+        .actions i { font-size: 1.2rem; cursor: pointer; margin-right: 10px; color: #0072ff; transition: 0.2s; }
+        .actions i:hover { color: #00c6ff; }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="logo"><i class='bx bx-chip'></i> SyncTech</div>
+        <div class="user-status"><div class="status-dot"></div> Personal de Ventas</div>
+        <ul class="nav-links">
+            <li><a href="ventas.html"><i class='bx bx-cart-add'></i> Venta Rápida</a></li>
+            <li><a href="facturacion.html"><i class='bx bx-cart'></i> Facturación</a></li>
+            <li><a href="#" class="active"><i class='bx bx-list-ul'></i> Pedidos</a></li>
+            <li><a href="#"><i class='bx bx-user'></i> Perfil</a></li>
+        </ul>
+        <a href="login.html" class="logout"><i class='bx bx-log-out'></i> Cerrar Sesión</a>
+    </nav>
+
+    <!-- CONTENIDO -->
+    <main class="main-content">
+        <h1>Registro de Pedidos (Facturas)</h1>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Factura</th>
+                        <th>Fecha y Hora</th>
+                        <th>ID Cliente</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPedidos">
+                    <tr><td colspan="5" style="text-align:center;">Cargando lista de facturas...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <!-- LÓGICA JAVASCRIPT PARA LEER DE LA NUBE Y GENERAR PDF -->
+    <script>
+        const API_URL = 'https://synctech-887224374141.us-central1.run.app';
+        const { jsPDF } = window.jspdf;
+
+
+        // ----------------------------------------------------
+        // FUNCIÓN 1: GENERAR PDF (Usando datos completos de la factura)
+        // ----------------------------------------------------
+
+        function generatePDF(factura) {
+            
+            // CORRECCIÓN 1: Convertir factura.total a número ANTES de usar toFixed
+            const totalNumeric = parseFloat(factura.total); 
+            const totalText = `$${totalNumeric.toFixed(2)} USD`;
+            const invoiceId = factura.id_factura;
+
+            const doc = new jsPDF();
+            let y = 20; 
+            const lineHeight = 7;
+            const margin = 15;
+            const col1 = margin;
+            const col2 = 100;
+            const col3 = 130;
+            const col4 = 175;
+
+            // Título y encabezado
+            doc.setFontSize(18);
+            doc.text("FACTURA DE VENTA - SyncTech", col1, y);
+            y += lineHeight;
+
+            doc.setFontSize(10);
+            doc.text("Dirección: San Salvador, El Salvador", col1, y);
+            y += lineHeight;
+            doc.text("Teléfono: +503 1234-5678", col1, y);
+            y += lineHeight * 2;
+            
+            // Datos de la Factura
+            doc.setFontSize(14);
+            doc.text(`FACTURA N° ${invoiceId}`, col1, y);
+            doc.setFontSize(10);
+            doc.text(`Fecha: ${new Date(factura.fecha).toLocaleDateString('es-SV')}`, 150, y);
+            y += lineHeight * 2;
+            
+            // Datos del Cliente
+            doc.setFontSize(12);
+            doc.text("CLIENTE:", col1, y);
+            y += lineHeight;
+            doc.setFontSize(10);
+            // Nombre viene directamente del JOIN en el Backend
+            doc.text(`Nombre: ${factura.nombre}`, col1, y); 
+            y += lineHeight;
+            doc.text(`DUI/ID: ${factura.dui || 'N/A'} (ID Cliente: ${factura.id_cliente})`, col1, y);
+            y += lineHeight * 2;
+            
+            // CABECERA DE LA TABLA
+            doc.setFontSize(10);
+            doc.setFillColor(200, 200, 200);
+            doc.rect(margin, y, 180, lineHeight, 'F');
+            doc.text("Producto", col1 + 2, y + 5);
+            doc.text("Cant.", col2, y + 5);
+            doc.text("P. Unitario", col3, y + 5);
+            doc.text("Subtotal", col4, y + 5, null, null, "right"); 
+            y += lineHeight;
+
+            // ITEMS DE LA TABLA 
+            doc.setFontSize(9);
+            factura.detalles.forEach(item => {
+                // CORRECCIÓN 2: Convertir precio_unitario y subtotal a número
+                const precio = parseFloat(item.precio_unitario);
+                const subtotal = parseFloat(item.subtotal);
+
+                doc.text(item.articulo.substring(0, 30), col1 + 2, y + 5);
+                doc.text(item.cantidad.toString(), col2, y + 5);
+                doc.text(`$${precio.toFixed(2)}`, col3, y + 5);
+                doc.text(`$${subtotal.toFixed(2)}`, col4, y + 5, null, null, "right");
+                y += lineHeight;
+            });
+            y += lineHeight;
+            
+            // TOTAL FINAL
+            doc.setFontSize(14);
+            doc.text("TOTAL:", col3, y + 5);
+            doc.text(totalText, col4, y + 5, null, null, "right");
+
+            // Pie de página
+            y += lineHeight * 3;
+            doc.setFontSize(8);
+            doc.text("Gracias por su compra.", col1, y);
+
+
+            // Guardar el PDF
+            doc.save(`Factura_SyncTech_${invoiceId}.pdf`);
+        }
+
+        // ----------------------------------------------------
+        // FUNCIÓN 2: CARGAR DETALLE Y ACTIVAR PDF
+        // ----------------------------------------------------
+        async function loadInvoiceDetails(id) {
+            
+            const icon = document.querySelector(`i[data-id="${id}"]`);
+            if (icon) {
+                 icon.classList.add('bx-spin'); // Muestra spinner de carga
+            }
+
+            try {
+                const url = `${API_URL}/factura/${id}`;
+                const respuesta = await fetch(url);
+                
+                // Si el servidor devuelve un error HTTP (4xx o 5xx)
+                if (!respuesta.ok) {
+                    // Si falla, intentamos leer el mensaje de error del servidor
+                    const errorDetails = await respuesta.json().catch(() => ({error: 'Respuesta ilegible'}));
+                    alert(`🔴 Error HTTP ${respuesta.status}. Mensaje: ${errorDetails.error || respuesta.statusText}`);
+                    return;
+                }
+
+                const data = await respuesta.json();
+
+                if (data.success) {
+                    // Genera el PDF con el objeto factura completo
+                    generatePDF({
+                        ...data.factura,
+                        detalles: data.detalles
+                    });
+                } else {
+                    alert(`Error de Lógica: No se encontraron detalles para la factura #${id}.`);
+                }
+
+            } catch (error) {
+                // Esto atrapa errores de red (conexión fallida, CORS)
+                console.error('Error de red/conexión al cargar factura para PDF:', error);
+                alert('🔴 Error de Conexión. Verifique que la URL de su API es correcta y que el servicio de Backend está activo.');
+            } finally {
+                if (icon) {
+                    icon.classList.remove('bx-spin'); // Remueve el spinner
+                }
+            }
+        }
+
+
+        // ----------------------------------------------------
+        // FUNCIÓN 3: CARGAR LISTA DE PEDIDOS
+        // ----------------------------------------------------
+        async function cargarPedidos() {
+            try {
+                const respuesta = await fetch(`${API_URL}/pedidos`);
+                const facturas = await respuesta.json();
+
+                const tbody = document.getElementById('tablaPedidos');
+                tbody.innerHTML = ''; 
+
+                if (facturas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">No hay pedidos registrados.</td></tr>';
+                    return;
+                }
+
+                facturas.forEach(fac => {
+                    const fila = document.createElement('tr');
+                    
+                    const fecha = new Date(fac.fecha).toLocaleString('es-ES', { 
+                        year: 'numeric', month: 'short', day: 'numeric', 
+                        hour: '2-digit', minute: '2-digit' 
+                    });
+
+                    // Convertir total a Number antes de formatear
+                    const totalFormatted = new Intl.NumberFormat('en-US', {
+                        style: 'currency', currency: 'USD'
+                    }).format(parseFloat(fac.total));
+                    
+                    // ID Factura añadido como data-id para el JavaScript
+                    fila.innerHTML = `
+                        <td>#${fac.id_factura}</td>
+                        <td>${fecha}</td>
+                        <td>${fac.id_cliente}</td>
+                        <td><b>${totalFormatted}</b></td>
+                        <td class="actions">
+                            <i class='bx bx-printer' data-id="${fac.id_factura}" onclick="loadInvoiceDetails(${fac.id_factura})" title="Descargar PDF"></i>
+                            <i class='bx bx-search-alt' title="Ver Detalles Sim."></i>
+                        </td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('tablaPedidos').innerHTML = 
+                    '<tr><td colspan="5" style="text-align:center; color:red; padding: 20px;">Error cargando pedidos.</td></tr>';
+            }
+        }
+
+        // ----------------------------------------------------
+        // INICIALIZACIÓN
+        // ----------------------------------------------------
+        cargarPedidos();
+    </script>
+
+</body>
+</html>
